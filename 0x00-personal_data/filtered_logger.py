@@ -2,6 +2,9 @@
 """Module for function that returns a log message obfuscated."""
 import logging
 import re
+import os
+import mysql.connector
+from mysql.connector import connection
 
 PII_FIELDS = ("name", "email", "phone", "ssn", "password")
 
@@ -44,3 +47,20 @@ def get_logger() -> logging.Logger:
 
     logger.addHandler(stream_handler)
     return logger
+
+
+def get_db() -> connection.MySQLConnection:
+    """Connects to a secure database and returns a MySQLConnection object."""
+    db_user = os.getenv('PERSONAL_DATA_DB_USERNAME', 'root')
+    db_password = os.getenv('PERSONAL_DATA_DB_PASSWORD', '')
+    db_host = os.getenv('PERSONAL_DATA_DB_HOST', 'localhost')
+    db_name = os.getenv('PERSONAL_DATA_DB_NAME')
+
+    conn = mysql.connector.connect(
+        user=db_user,
+        password=db_password,
+        host=db_host,
+        database=db_name
+    )
+
+    return conn
