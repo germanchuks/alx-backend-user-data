@@ -53,7 +53,7 @@ def get_logger() -> logging.Logger:
     return logger
 
 
-def get_db() -> connection.MySQLConnection:
+def get_db() -> mysql.connector.connection.MySQLConnection:
     """Connects to a secure database and returns a MySQLConnection object."""
     db_user = os.getenv('PERSONAL_DATA_DB_USERNAME', 'root')
     db_password = os.getenv('PERSONAL_DATA_DB_PASSWORD', '')
@@ -70,7 +70,7 @@ def get_db() -> connection.MySQLConnection:
     return conn
 
 
-def main():
+def main() -> None:
     """Retrieves and logs user data."""
     db = get_db()
     cursor = db.cursor(dictionary=True)
