@@ -64,3 +64,23 @@ def get_db() -> connection.MySQLConnection:
     )
 
     return conn
+
+
+def main():
+    """Retrieves and logs user data."""
+    db = get_db()
+    cursor = db.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM users;")
+
+    logger = get_logger()
+
+    for row in cursor:
+        msg = "; ".join([f"{k}={v}" for k, v in row.items()])
+        logger.info(msg)
+
+    cursor.close()
+    db.close()
+
+
+if __name__ == "__main__":
+    main()
