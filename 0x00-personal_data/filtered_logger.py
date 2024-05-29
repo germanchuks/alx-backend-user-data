@@ -5,14 +5,18 @@ import re
 import os
 import mysql.connector
 from mysql.connector import connection
+from typing import List
 
 PII_FIELDS = ("name", "email", "phone", "ssn", "password")
 
 
-def filter_datum(fields, redaction, message, separator):
+def filter_datum(fields: List[str], redaction: str, message: str,
+                 separator: str) -> str:
     """Obfuscates specific fields in a log message."""
-    pattern = f'({"|".join(fields)})=([^"{separator}"]*)'
-    return re.sub(pattern, lambda m: f'{m.group(1)}={redaction}', message)
+    for field in fields:
+        message = re.sub(rf"{field}=(.*?)\{separator}",
+                         f'{field}={redaction}{separator}', message)
+    return message
 
 
 class RedactingFormatter(logging.Formatter):
@@ -22,7 +26,7 @@ class RedactingFormatter(logging.Formatter):
     FORMAT = "[HOLBERTON] %(name)s %(levelname)s %(asctime)-15s: %(message)s"
     SEPARATOR = ";"
 
-    def __init__(self, fields):
+    def __init__(self, fields: List[str]):
         super(RedactingFormatter, self).__init__(self.FORMAT)
         self.fields = fields
 
