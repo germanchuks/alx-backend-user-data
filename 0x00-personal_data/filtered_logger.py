@@ -3,6 +3,8 @@
 import logging
 import re
 
+PII_FIELDS = ("name", "email", "phone", "ssn", "password")
+
 
 def filter_datum(fields, redaction, message, separator):
     """Obfuscates specific fields in a log message."""
@@ -11,7 +13,7 @@ def filter_datum(fields, redaction, message, separator):
 
 
 class RedactingFormatter(logging.Formatter):
-    """Redacting Formatter class"""
+    """Redacting Formatter class."""
 
     REDACTION = "***"
     FORMAT = "[HOLBERTON] %(name)s %(levelname)s %(asctime)-15s: %(message)s"
@@ -22,9 +24,23 @@ class RedactingFormatter(logging.Formatter):
         self.fields = fields
 
     def format(self, record: logging.LogRecord) -> str:
-        """Filter values in incoming log records"""
+        """Filter values in incoming log records."""
         original_msg = record.getMessage()
         filtered_msg = filter_datum(
             self.fields, self.REDACTION, original_msg, self.SEPARATOR)
         record.msg = filtered_msg
         return super(RedactingFormatter, self).format(record)
+
+
+def get_logger() -> logging.Logger:
+    """Creates a logger."""
+    logger = logging.getLogger("user_data")
+    logger.setLevel(logging.INFO)
+    logger.propagate = False
+
+    stream_handler = logging.StreamHandler()
+    formatter = RedactingFormatter(PII_FIELDS)
+    stream_handler.setFormatter(formatter)
+
+    logger.addHandler(stream_handler)
+    return logger
