@@ -18,15 +18,16 @@ class Auth:
         if excluded_paths is None or not excluded_paths:
             return True
 
-        if path.endswith('/'):
-            path = path[:-1]
+        path = path.rstrip('/')
 
         for excluded_path in excluded_paths:
-            if excluded_path.endswith('/'):
-                excluded_path = excluded_path[:-1]
-
-            if path == excluded_path:
-                return False
+            if excluded_path.endswith('*'):
+                if path.startswith(excluded_path.rstrip('*')):
+                    return False
+            else:
+                excluded_path = excluded_path.rstrip('/')
+                if path == excluded_path:
+                    return False
 
         return True
 
