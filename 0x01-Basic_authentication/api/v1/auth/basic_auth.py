@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """ Module for Basic Authentication
 """
+from api.v1.auth.auth import Auth
 import base64
 from typing import TypeVar
 from models.user import User
 
 
-class BasicAuth:
+class BasicAuth(Auth):
     """ Basic Authentication class that inherits from Auth
     """
 
@@ -68,3 +69,27 @@ class BasicAuth:
             return None
 
         return user
+
+    def current_user(self, request=None) -> TypeVar('User'):
+        """ Overloads Auth and retrieves the User instance for a request
+        """
+        if request is None:
+            return None
+
+        auth_header = self.authorization_header(request)
+        if auth_header is None:
+            return None
+
+        base64_header = self.extract_base64_authorization_header(auth_header)
+        if base64_header is None:
+            return None
+
+        dcoded_header = self.decode_base64_authorization_header(base64_header)
+        if dcoded_header is None:
+            return None
+
+        user_email, user_pwd = self.extract_user_credentials(dcoded_header)
+        if user_email is None or user_pwd is None:
+            return None
+
+        return self.user_object_from_credentials(user_email, user_pwd)
