@@ -56,29 +56,21 @@ def forbidden(error) -> str:
 def before_request():
     """ Before request
     """
-    if auth is None:
-        return
-    excluded_paths = [
-        '/api/v1/status/',
-        '/api/v1/unauthorized/',
-        '/api/v1/forbidden/',
-        '/api/v1/auth_session/login/'
-    ]
-
-    if request.path in excluded_paths:
-        return
-
-    if not auth.require_auth(request.path, excluded_paths):
-        return
-
-    if auth.authorization_header(request) is None and \
-            auth.session_cookie(request) is None:
-        abort(401)
-
-    current_user = auth.current_user(request)
-    if current_user is None:
-        abort(403)
-    request.current_user = current_user
+    if auth:
+        paths = [
+            '/api/v1/status/',
+            '/api/v1/unauthorized/',
+            '/api/v1/forbidden/',
+            '/api/v1/auth_session/login/'
+        ]
+        if not auth.require_auth(request.path, paths):
+            return
+        if (not auth.authorization_header(request) and
+                not auth.session_cookie(request)):
+            abort(401)
+        request.current_user = auth.current_user(request)
+        if not request.current_user:
+            abort(403)
 
 
 if __name__ == "__main__":
