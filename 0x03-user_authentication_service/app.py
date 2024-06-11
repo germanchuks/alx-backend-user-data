@@ -38,8 +38,8 @@ def users():
 def login():
     """ Handles user login.
     """
-    email = request.form.get("email")
-    password = request.form.get("password")
+    email = request.form.get('email')
+    password = request.form.get('password')
 
     if not email or not password:
         return
@@ -51,8 +51,8 @@ def login():
     if not session_id:
         abort(401)
 
-    resp = make_response(jsonify({"email": email, "message": "logged in"}))
-    resp.set_cookie("session_id", session_id)
+    resp = jsonify({"email": email, "message": "logged in"})
+    resp.set_cookie('session_id', session_id)
     return resp
 
 
@@ -60,7 +60,7 @@ def login():
 def logout():
     """ Destroys session.
     """
-    session_id = request.cookies.get("session_id")
+    session_id = request.cookies.get('session_id')
 
     user = AUTH.get_user_from_session_id(session_id)
     if not user:

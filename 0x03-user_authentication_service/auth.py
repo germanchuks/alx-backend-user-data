@@ -9,14 +9,14 @@ import uuid
 from typing import Optional
 
 
-def _hash_password(password: str) -> bytes:
+def _hash_password(password: str) -> str:
     """ Hashes a string password and returns the salted hash.
     """
     hashed_pword = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
     return hashed_pword
 
 
-def _generate_uuid():
+def _generate_uuid() -> str:
     """ Returns a string representation of a new UUID.
     """
     return str(uuid.uuid4())
@@ -46,11 +46,9 @@ class Auth:
         """
         try:
             user = self._db.find_user_by(email=email)
-            if bcrypt.checkpw(password.encode('utf-8'), user.hashed_password):
-                return True
-        except Exception:
+        except NoResultFound:
             return False
-        return False
+        return bcrypt.checkpw(password.encode('utf-8'), user.hashed_password)
 
     def create_session(self, email: str) -> str:
         """ Generates new UUID and store as user session ID in the database.
@@ -63,17 +61,17 @@ class Auth:
         except NoResultFound:
             return
 
-    def get_user_from_session_id(self, session_id: str) -> Optional[User]:
+    def get_user_from_session_id(self, session_id: str) -> str:
         """ Finds a user with session ID.
         """
         if session_id is None:
-            return None
+            return
 
         try:
             user = self._db.find_user_by(session_id=session_id)
-            return user
+            return user.email
         except NoResultFound:
-            return None
+            return
 
     def destroy_session(self, user_id: int) -> None:
         """ Updates the user session ID to None.
